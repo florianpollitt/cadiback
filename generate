@@ -4,9 +4,11 @@ die () {
   exit 1
 }
 [ -f VERSION ] || die "could not find 'VERSION' file"
+[ -f ../cadical/VERSION ] || die "could not find '../cadical/VERSION' file"
 [ -d .git ] || die "could not find '.git' directory"
 [ -f makefile ] || die "could not find 'makefile'"
 VERSION="`cat VERSION`"
+VERSION="$VERSION-`cat ../cadical/VERSION`"
 GITID="`git show|head -1|awk '{print $2}'`"
 BUILD="`sed '/^COMPILE/!d;s,^COMPILE=,,;s, -I.*,,' makefile`"
 cat <<EOF

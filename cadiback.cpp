@@ -214,6 +214,7 @@ struct {
 // statistics even if execution is interrupted or an error occurs.
 //
 static CaDiCaL::Solver *solver;
+static bool terminated = false;
 
 // Some statistics are collected here.
 
@@ -327,6 +328,10 @@ static double stop_timer () {
   double delta = end - start_time;
   *timer += delta;
   return delta;
+}
+static void terminate () {
+  solver->terminate ();
+  terminated = true;
 }
 
 static void print_statistics () {
@@ -444,6 +449,8 @@ class CadiBackSignalHandler : public CaDiCaL::Handler {
       return;
     printf ("c caught signal %d\n", sig);
     print_statistics ();
+    terminate ();
+    CaDiCaL::Signal::reset ();
   }
 };
 
@@ -848,6 +855,8 @@ static int big_els (std::vector<int> &f, std::vector<int> &e,
       continue;
     work = {u};
     while (work.size () > 0) {
+      if (terminated)
+        break;
       int u = work.back ();
       if (u == static_cast<int> (INV)) {
         work.pop_back ();
@@ -1446,7 +1455,8 @@ int main (int argc, char **argv) {
 
     line ();
     msg ("starting solving after %.2f seconds", time ());
-    res = solve ();
+    if (!terminated)
+      res = solve ();
     assert (res == 10 || res == 20);
 
     if (checker) {
@@ -1566,13 +1576,17 @@ int main (int argc, char **argv) {
           bool progress = false;
 
           while (assumed) {
+            if (terminated)
+              break;
 
             dbg ("core based approach assumes %d literals", assumed);
 
             for (int i = 0; i != assumed; i++)
               solver->assume (core[i]);
 
-            int tmp = solve ();
+            int tmp = 0;
+            if (!terminated)
+              tmp = solve ();
             if (tmp == 10) {
 
               dbg ("all %d negatively assumed backbone candidates "
@@ -1717,7 +1731,8 @@ int main (int argc, char **argv) {
             solver->constrain (0);
           }
 
-          last = solve ();
+          if (!terminated)
+            last = solve ();
           if (last == 10) {
             dbg ("constraining negation of %d backbones candidates "
                  "starting with variable %d all-at-once produced model",
@@ -1756,7 +1771,8 @@ int main (int argc, char **argv) {
 
         dbg ("assuming negation %d of backbone candidate %d", -lit, lit);
         solver->assume (-lit);
-        last = solve ();
+        if (!terminated)
+          last = solve ();
         if (last == 10) {
           dbg ("found model satisfying single assumed "
                "negation %d of backbone candidate %d",

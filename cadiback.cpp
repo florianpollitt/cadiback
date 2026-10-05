@@ -1642,30 +1642,30 @@ int main (int argc, char **argv) {
         }
 
         // If not disabled through '--one-by-one' use the 'constrain'
-	// optimization which assumes the disjunction of the negation of all
-	// remaining possible backbone candidate literals.  By default this
-	// uses the 'constrain' API call described in our FMCAD'21 paper
-	// (unless '--no-constrain' is specified in which case we use
-	// activation literals as in 'MiniBones')).
+        // optimization which assumes the disjunction of the negation of all
+        // remaining possible backbone candidate literals.  By default this
+        // uses the 'constrain' API call described in our FMCAD'21 paper
+        // (unless '--no-constrain' is specified in which case we use
+        // activation literals as in 'MiniBones')).
 
         // If the remaining backbone candidates are all actually backbones
-	// then only one such call can be enough to prove it. Otherwise
-	// without 'constraints' we need as many solver calls as there are
-	// candidates.  Without constrain this puts heavy load on the
-	// 'restore' algorithm which in some instances ended up taking 99%
-	// of the running time.
+        // then only one such call can be enough to prove it. Otherwise
+        // without 'constraints' we need as many solver calls as there are
+        // candidates.  Without constrain this puts heavy load on the
+        // 'restore' algorithm which in some instances ended up taking 99%
+        // of the running time.
 
-	// It seems reasonable to limit the size of the constraint (the
-	// number of negated candidate literals where one is assumed to be
-	// flippable) by some sort of chunking.  In contrast to earlier work
-	// in 'MiniBones' we adapt the limit during chunking as follows.  As
-	// long constraint was unsatisfiable (and all the contained
-	// candidates are thus fixed) we increase the limit on the
-	// considered candidates in the constraint exponentially (by the
-	// hard coded factor 10).  If the call returns a model we go back to
-	// checking candidates one-by-one.  If the following call returns
-	// unsatisfiable, we limit the size of the constraint to 10
-	// candidates next time etc.
+        // It seems reasonable to limit the size of the constraint (the
+        // number of negated candidate literals where one is assumed to be
+        // flippable) by some sort of chunking.  In contrast to earlier work
+        // in 'MiniBones' we adapt the limit during chunking as follows.  As
+        // long constraint was unsatisfiable (and all the contained
+        // candidates are thus fixed) we increase the limit on the
+        // considered candidates in the constraint exponentially (by the
+        // hard coded factor 10).  If the call returns a model we go back to
+        // checking candidates one-by-one.  If the following call returns
+        // unsatisfiable, we limit the size of the constraint to 10
+        // candidates next time etc.
 
         if (!one_by_one && chunking) {
           if (last == 20)

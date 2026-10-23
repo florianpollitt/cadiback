@@ -1338,6 +1338,7 @@ int main (int argc, char **argv) {
   for (const auto &option : cadical_options) {
     solver->set_long_option (option.c_str ());
   }
+  solver->options ();
   int res = 0;
   {
     CadiBackSignalHandler handler;
